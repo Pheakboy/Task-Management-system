@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -16,10 +17,20 @@ class DashboardController extends Controller
         $user = Auth::user();
         
         if ($user->isAdmin()) {
-            return view('admin.dashboard');
+            $projects = Project::with('tasks')->latest()->get();
+        } else {
+            $projects = $user->projects()->with('tasks')->latest()->get();
         }
+
+        // Calculate task statistics
+        $projectsWithStats = $projects->map(function ($project) {
+            return [
+                'project' => $project,
+                'stats' => $project->taskCountsByStatus(),
+            ];
+        });
         
-        return view('dashboard');
+        return view('dashboard', ['projectsWithStats' => $projectsWithStats]);
     }
 
     /**
@@ -27,6 +38,15 @@ class DashboardController extends Controller
      */
     public function admin(): View
     {
-        return view('admin.dashboard');
+        $projects = Project::with('tasks')->latest()->get();
+
+        $projectsWithStats = $projects->map(function ($project) {
+            return [
+                'project' => $project,
+                'stats' => $project->taskCountsByStatus(),
+            ];
+        });
+
+        return view('admin.dashboard', ['projectsWithStats' => $projectsWithStats]);
     }
 }

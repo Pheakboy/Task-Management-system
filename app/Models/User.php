@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -64,5 +65,21 @@ class User extends Authenticatable
     public function isUser(): bool
     {
         return $this->role === self::ROLE_USER;
+    }
+
+    /**
+     * User has many projects (owned projects).
+     */
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class, 'created_by');
+    }
+
+    /**
+     * User has many tasks (assigned tasks).
+     */
+    public function assignedTasks(): HasMany
+    {
+        return $this->hasMany(Task::class, 'assigned_to');
     }
 }
