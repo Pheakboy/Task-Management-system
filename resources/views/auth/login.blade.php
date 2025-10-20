@@ -48,14 +48,5 @@
                 {{ __('Log in') }}
             </x-primary-button>
         </div>
-
-        <div class="mt-6 text-center">
-            <p class="text-sm text-gray-600">
-                Are you an admin? 
-                <a href="{{ route('admin.login') }}" class="text-red-600 hover:text-red-500">
-                    Admin Login
-                </a>
-            </p>
-        </div>
     </form>
 </x-guest-layout>

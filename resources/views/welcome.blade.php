@@ -35,14 +35,7 @@
                             href="{{ route('login') }}"
                             class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] text-[#1b1b18] border border-transparent hover:border-[#19140035] dark:hover:border-[#3E3E3A] rounded-sm text-sm leading-normal"
                         >
-                            User Login
-                        </a>
-
-                        <a
-                            href="{{ route('admin.login') }}"
-                            class="inline-block px-5 py-1.5 text-white bg-red-600 hover:bg-red-700 border border-red-600 hover:border-red-700 rounded-sm text-sm leading-normal"
-                        >
-                            Admin Login
+                            Login
                         </a>
 
                         @if (Route::has('register'))

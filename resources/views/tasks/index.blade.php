@@ -18,6 +18,88 @@
                 </div>
             @endif
 
+            <!-- Filters and Search -->
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold mb-4">Filter & Search Tasks</h3>
+                    <form method="GET" action="{{ route('tasks.index') }}" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <!-- Search -->
+                            <div>
+                                <label for="search" class="block text-sm font-medium text-gray-700">Search Title</label>
+                                <input 
+                                    type="text" 
+                                    name="search" 
+                                    id="search" 
+                                    value="{{ request('search') }}" 
+                                    placeholder="Search by title..."
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                >
+                            </div>
+
+                            <!-- Project Filter -->
+                            <div>
+                                <label for="project_id" class="block text-sm font-medium text-gray-700">Project</label>
+                                <select 
+                                    name="project_id" 
+                                    id="project_id" 
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                >
+                                    <option value="">All Projects</option>
+                                    @foreach($projects as $project)
+                                        <option value="{{ $project->id }}" {{ request('project_id') == $project->id ? 'selected' : '' }}>
+                                            {{ $project->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Status Filter -->
+                            <div>
+                                <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                                <select 
+                                    name="status" 
+                                    id="status" 
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                >
+                                    <option value="">All Statuses</option>
+                                    <option value="todo" {{ request('status') == 'todo' ? 'selected' : '' }}>To Do</option>
+                                    <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
+                                    <option value="done" {{ request('status') == 'done' ? 'selected' : '' }}>Done</option>
+                                </select>
+                            </div>
+
+                            <!-- Assigned User Filter -->
+                            <div>
+                                <label for="assigned_to" class="block text-sm font-medium text-gray-700">Assigned To</label>
+                                <select 
+                                    name="assigned_to" 
+                                    id="assigned_to" 
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                >
+                                    <option value="">All Users</option>
+                                    @foreach($users as $user)
+                                        <option value="{{ $user->id }}" {{ request('assigned_to') == $user->id ? 'selected' : '' }}>
+                                            {{ $user->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">
+                                Apply Filters
+                            </button>
+                            <a href="{{ route('tasks.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300">
+                                Clear Filters
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tasks List -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     @if($tasks->count() > 0)
