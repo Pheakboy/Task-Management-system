@@ -30,6 +30,25 @@
                             @enderror
                         </div>
 
+                        <!-- Assign to User (Admin Only) -->
+                        @if(Auth::user()->isAdmin() && $users->count() > 0)
+                            <div class="mb-4">
+                                <label for="created_by" class="block font-medium text-sm text-gray-700">Assign Project To</label>
+                                <select id="created_by" name="created_by" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <option value="">Select User (or leave empty for yourself)</option>
+                                    @foreach($users as $user)
+                                        <option value="{{ $user->id }}" {{ old('created_by') == $user->id ? 'selected' : '' }}>
+                                            {{ $user->name }} ({{ $user->email }}) - {{ ucfirst($user->role) }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('created_by')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                                <p class="mt-1 text-sm text-gray-500">Leave empty to assign to yourself</p>
+                            </div>
+                        @endif
+
                         <div class="flex items-center justify-end mt-4">
                             <a href="{{ route('projects.index') }}" class="mr-4 text-sm text-gray-600 hover:text-gray-900">
                                 Cancel

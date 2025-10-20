@@ -32,7 +32,14 @@ class ProjectController extends Controller
      */
     public function create()
     {
-        return view('projects.create');
+        $user = Auth::user();
+        
+        // Get users for assignment - only admins can assign projects to others
+        $users = $user->isAdmin() 
+            ? \App\Models\User::all()
+            : collect([]);
+
+        return view('projects.create', compact('users'));
     }
 
     /**
@@ -40,15 +47,23 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
+        $user = Auth::user();
+        
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'created_by' => ['nullable', 'exists:users,id'],
         ]);
+
+        // If admin and created_by is provided, use it. Otherwise use current user
+        $createdBy = $user->isAdmin() && $request->filled('created_by')
+            ? $validated['created_by']
+            : Auth::id();
 
         $project = Project::create([
             'name' => $validated['name'],
             'description' => $validated['description'] ?? null,
-            'created_by' => Auth::id(),
+            'created_by' => $createdBy,
         ]);
 
         return redirect()->route('projects.show', $project)->with('status', 'Project created.');
@@ -67,7 +82,14 @@ class ProjectController extends Controller
      */
     public function edit(Project $project)
     {
-        return view('projects.edit', compact('project'));
+        $user = Auth::user();
+        
+        // Get users for assignment - only admins can reassign projects
+        $users = $user->isAdmin() 
+            ? \App\Models\User::all()
+            : collect([]);
+
+        return view('projects.edit', compact('project', 'users'));
     }
 
     /**
@@ -75,12 +97,25 @@ class ProjectController extends Controller
      */
     public function update(Request $request, Project $project)
     {
+        $user = Auth::user();
+        
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'created_by' => ['nullable', 'exists:users,id'],
         ]);
 
-        $project->update($validated);
+        $updateData = [
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?? null,
+        ];
+
+        // Only admin can change project owner
+        if ($user->isAdmin() && $request->filled('created_by')) {
+            $updateData['created_by'] = $validated['created_by'];
+        }
+
+        $project->update($updateData);
 
         return redirect()->route('projects.show', $project)->with('status', 'Project updated.');
     }
