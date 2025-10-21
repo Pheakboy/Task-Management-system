@@ -78,8 +78,8 @@ class TaskController extends Controller
             ? Project::all()
             : Project::where('created_by', $user->id)->get();
 
-        // Get all users for assignment (both admin and regular users can assign to anyone)
-        $users = User::all();
+        // Admins can assign to anyone, regular users can only assign to themselves
+        $users = $user->isAdmin() ? User::all() : collect([$user]);
 
         return view('tasks.create', compact('projects', 'users', 'projectId'));
     }
@@ -105,6 +105,11 @@ class TaskController extends Controller
             $project = Project::findOrFail($validated['project_id']);
             if ($project->created_by !== $user->id) {
                 abort(403, 'You can only create tasks in your own projects.');
+            }
+            
+            // Regular users can only assign tasks to themselves
+            if ($validated['assigned_to'] != $user->id) {
+                abort(403, 'You can only assign tasks to yourself.');
             }
         }
 
@@ -134,8 +139,8 @@ class TaskController extends Controller
             ? Project::all()
             : Project::where('created_by', $user->id)->get();
 
-        // Get all users for assignment (both admin and regular users can assign to anyone)
-        $users = User::all();
+        // Admins can assign to anyone, regular users can only assign to themselves
+        $users = $user->isAdmin() ? User::all() : collect([$user]);
 
         return view('tasks.edit', compact('task', 'projects', 'users'));
     }
@@ -145,6 +150,8 @@ class TaskController extends Controller
      */
     public function update(Request $request, Task $task)
     {
+        $user = Auth::user();
+        
         $validated = $request->validate([
             'project_id' => ['required', 'exists:projects,id'],
             'title' => ['required', 'string', 'max:255'],
@@ -153,6 +160,11 @@ class TaskController extends Controller
             'status' => ['required', 'in:todo,in_progress,done'],
             'due_date' => ['nullable', 'date'],
         ]);
+
+        // Regular users can only assign tasks to themselves
+        if (!$user->isAdmin() && $validated['assigned_to'] != $user->id) {
+            abort(403, 'You can only assign tasks to yourself.');
+        }
 
         $task->update($validated);
 

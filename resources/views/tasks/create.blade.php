@@ -50,22 +50,23 @@
                         <div class="mb-4">
                             <label for="assigned_to" class="block font-medium text-sm text-gray-700">Assign To *</label>
 
-                            @if(Auth::check() && Auth::user()->name === 'user1')
-                                <input type="hidden" name="assigned_to" value="{{ Auth::id() }}">
-                                <select id="assigned_to" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" disabled>
-                                    <option value="{{ Auth::id() }}" selected>
-                                        {{ Auth::user()->name }} ({{ Auth::user()->email }})
-                                    </option>
-                                </select>
-                            @else
+                            @if(Auth::user()->isAdmin())
+                                <!-- Admin can assign to anyone -->
                                 <select id="assigned_to" name="assigned_to" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
                                     <option value="">Select a user</option>
                                     @foreach($users as $user)
                                         <option value="{{ $user->id }}" {{ old('assigned_to', Auth::id()) == $user->id ? 'selected' : '' }}>
-                                            {{ $user->name }} ({{ $user->email }})
+                                            {{ $user->name }} ({{ $user->email }}) - {{ ucfirst($user->role) }}
                                         </option>
                                     @endforeach
                                 </select>
+                            @else
+                                <!-- Regular user can only assign to themselves -->
+                                <input type="hidden" name="assigned_to" value="{{ Auth::id() }}">
+                                <div class="mt-1 block w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-gray-500">
+                                    {{ Auth::user()->name }} ({{ Auth::user()->email }}) - You
+                                </div>
+                                <p class="mt-1 text-xs text-gray-500">Tasks can only be assigned to yourself.</p>
                             @endif
 
                             @error('assigned_to')
